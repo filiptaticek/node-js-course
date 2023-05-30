@@ -19,15 +19,17 @@ function serverHandler(req, res) {
     res.setHeader("Location", "/") //sending us back to home page
     req.on("data", (chunk) => {
       body.push(chunk)
-      console.log("First body", body)
     })
     req.on("end", () => {
       const parseBody = Buffer.concat(body).toString()
       const message = parseBody.split("=")[1]
-      fs.writeFileSync("message.txt", message) //creating a file with content same as of the one of our POST request
+      console.log(message)
+      //with writeFileSYNC, the following code will stop until the file is created
+      fs.writeFile("message.txt", message, (err) => {
+        res.writeHead(302)
+        return res.end("Request succesfuly made...")
+      })
     })
-    res.writeHead(302)
-    return res.end("Request succesfuly made...")
   }
 }
 
