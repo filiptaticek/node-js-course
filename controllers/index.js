@@ -1,6 +1,6 @@
 // All the controllers responsible for working with products
 
-const products = []
+const Product = require("../models/product")
 
 function adminGet(req, res, next) {
   /* We can make difference between app.get and app.post, app.use is for any request.
@@ -11,13 +11,17 @@ function adminGet(req, res, next) {
 }
 
 function adminPost(req, res, next) {
-  console.log("Redirected man")
-  products.push(req.body.title)
+  const product = new Product(req.body.title)
+  product.save()
   res.redirect("/shop")
+  console.log("Redirected man")
 }
 
 function shopGet(req, res, next) {
-  res.send(`<p>Here is the list of our products: </p> ${products}`)
+  const products = Product.fetchAll()
+  res.send(`<p>Here is the list of our products: </p> 
+  ${products.map((product) => `<li>${product.title}</li>`)}
+  `)
 }
 
 function fourOhFour(req, res, next) {
