@@ -2,7 +2,23 @@
 
 const fs = require("fs")
 const path = require("path")
-const products = []
+
+const p = path.join(
+  path.dirname(process.mainModule.filename),
+  "data", //finding the seeked file
+  "products.json"
+)
+
+function getProductsFile(cb) {
+  //we use the callback function to return the content only once the data is fetched
+  fs.readFile(p, (err, fileContent) => {
+    if (err) {
+      cb([])
+    } else {
+      cb(JSON.parse(fileContent))
+    }
+  })
+}
 
 module.exports = class Product {
   constructor(t) {
@@ -10,18 +26,7 @@ module.exports = class Product {
   }
 
   save() {
-    console.log("Da bin ich noch")
-    const p = path.join(
-      path.dirname(process.mainModule.filename),
-      "data", //finding the seeked file
-      "products.json"
-    )
-    fs.readFile(p, (err, fileContent) => {
-      //reading the current content of the file
-      let products = []
-      if (!err) {
-        products = JSON.parse(fileContent) //if there's no error we parse the content of the file
-      }
+    getProductsFile((products) => {
       products.push(this)
       fs.writeFile(p, JSON.stringify(products), (err) => {
         console.log(err)
@@ -30,17 +35,6 @@ module.exports = class Product {
   }
 
   static fetchAll(cb) {
-    //we use the callback function to return the content only once the data is fetched
-    const p = path.join(
-      path.dirname(process.mainModule.filename),
-      "data", //finding the seeked file
-      "products.json"
-    )
-    fs.readFile(p, (err, fileContent) => {
-      if (err) {
-        cb([])
-      }
-      cb(JSON.parse(fileContent))
-    })
+    getProductsFile(cb)
   }
 }
