@@ -2,7 +2,7 @@
 
 const Product = require("../models/product")
 
-function adminGet(req, res, next) {
+function adminGet(req, res) {
   /* We can make difference between app.get and app.post, app.use is for any request.
    The more specific middleware has to be first, otherwise it will never be reached */
   res.send(
@@ -10,21 +10,24 @@ function adminGet(req, res, next) {
   )
 }
 
-function adminPost(req, res, next) {
+function adminPost(req, res) {
   const product = new Product(req.body.title)
   product.save()
+  console.log("Uložil jsem svůj product", product)
   res.redirect("/shop")
-  console.log("Redirected man")
 }
 
-function shopGet(req, res, next) {
-  const products = Product.fetchAll()
-  res.send(`<p>Here is the list of our products: </p> 
-  ${products.map((product) => `<li>${product.title}</li>`)}
-  `)
+function shopGet(req, res) {
+  Product.fetchAll((products) => {
+    //the page is loaded only once all the products are fetched
+    res.send(`<p>Here is the list of our products: </p> 
+    ${products.map((product) => `<li>${product.title}</li>`)}
+    <button onclick="window.location.href='/admin'">Go to back to admin</button>
+    `)
+  })
 }
 
-function fourOhFour(req, res, next) {
+function fourOhFour(req, res) {
   //catching all the uncatched
   res.send(`
     <button onclick="window.location.href='/admin'">Go to Admin</button>
