@@ -55,9 +55,10 @@ function defaultPage(req, res) {
 
 function productDetailGet(req, res) {
   const productId = req.params.productId
-  res.send(
-    `Here is how you can work with data from your url, for example id: ${productId}`
-  )
+  Product.fetchOne(productId, (product) => {
+    res.send(`<div>Page for a simple product by their ID from the URL: ${productId}<br/><br/>
+    Title: ${product.title}</div>`)
+  })
 }
 
 /*_______________________________________________________________________________________*/
