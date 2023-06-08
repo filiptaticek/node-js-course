@@ -1,4 +1,4 @@
-//we will define our data types in here later on
+//all the data objects are defined in this file
 
 const fs = require("fs")
 const path = require("path")
@@ -26,6 +26,7 @@ module.exports = class Product {
   }
 
   save() {
+    this.id = Math.random().toString()
     getProductsFile((products) => {
       products.push(this)
       fs.writeFile(p, JSON.stringify(products), (err) => {
