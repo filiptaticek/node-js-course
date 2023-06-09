@@ -1,0 +1,23 @@
+We have two kinds of databases, SQL (for instance MySQL) and NoSQL (for instance MongoDB)
+
+1. SQL 
+a. tables, such as users, products, and so on. 
+b.collumns, such as name, email, password and so on. 
+c. records - the data
+- We have data schema, we define the types of records, and all the data have to fit this schema. 
+- They allow you to relate different tables - create relations.
+- We have three types of relations: 
+a. one-to-one
+b. one-to-many
+c. many-to-many
+- The reason why it is called SQL is because it uses Queries 
+
+2. NoSQL
+a. collections - the same as tables
+b. documents - this is how we describe data in JS
+
+- NoSQL does not have a strict schema or structure
+- There usually are not relations
+
+3. Installation of MySQL database. 
+So on MacOS, we need to install this: https://dev.mysql.com/downloads/mysql/ and also this: https://dev.mysql.com/downloads/workbench/
