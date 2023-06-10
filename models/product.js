@@ -1,4 +1,27 @@
-//all the data objects are defined in this file
+const Sequelize = require("sequelize")
+const sequelize = require("../util/database")
+
+const Product = sequelize.define("product", {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
+  title: Sequelize.STRING,
+  price: {
+    type: Sequelize.DOUBLE,
+    allowNull: false,
+  },
+  description: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+})
+
+module.exports = Product
+
+/*all the data objects are defined in this file
 const db = require("../util/database")
 
 module.exports = class Product {
@@ -22,4 +45,4 @@ module.exports = class Product {
   static findById(id) {
     return db.execute("SELECT * FROM products WHERE products.id = ?", [id])
   }
-}
+}*/

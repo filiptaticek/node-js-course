@@ -21,3 +21,8 @@ b. documents - this is how we describe data in JS
 
 3. Installation of MySQL database. 
 So on MacOS, we need to install this: https://dev.mysql.com/downloads/mysql/ and also this: https://dev.mysql.com/downloads/workbench/
+
+4. Working wiht MySQL database. 
+In the database, you create some tables and views, and then work with your database with commands such as: 
+    return db.execute("SELECT * FROM products WHERE products.id = ?", [id])
+However it is simplier to work with tools such as Sequelize. 
