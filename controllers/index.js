@@ -19,11 +19,14 @@ function adminPost(req, res) {
   const title = req.body.title
   const description = "Description"
   const price = 9.99
-  const product = new Product(title, price, description)
-  product
-    .save()
-    .then(() => {
-      res.redirect("/product")
+  Product.create({
+    title,
+    description,
+    price,
+  })
+    .then((result) => {
+      console.log("Added a new book succesfuly.")
+      res.redirect("/")
     })
     .catch((err) => console.log(err))
 }
@@ -32,35 +35,28 @@ function adminPost(req, res) {
 
 function productGet(req, res) {
   //fetching all the products from the database
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
-      res.send(`
-      <div><h2>Products</h2>
-        <ul>
-          ${rows
-            .map(
-              (product) =>
-                `<li><a href="product/${product.id}">${product.title}</a></li>`
-            )
-            .join("")}
-        </ul>
-      </div>
-      `)
+  Product.findAll()
+    .then((products) => {
+      const productHTML = products
+        .map(
+          (product) =>
+            `<a href="/product/${product.id}">Title: ${product.title}</p>`
+        )
+        .join("")
+      res.send(productHTML)
     })
-    .catch((err) => console.log(err))
+    .catch((err) => console.log("Some err", err))
 }
 
 /*_______________________________________________________________________________________*/
 
 function productDetailGet(req, res) {
   //page displaying a single product
-  const productId = req.params.productId
-  Product.findById(productId)
-    .then(([product]) => {
-      res.send(
-        `<p>This is the single product with a title: ${product[0].title}`
-      )
-    })
+  //const prodId = req.body.productId
+  Product.findByPk(1)
+    .then((result) =>
+      res.send(`<p>This is the title of your book: ${result.title}!`)
+    )
     .catch((err) => console.log(err))
 }
 

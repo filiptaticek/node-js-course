@@ -16,8 +16,7 @@ app.use(controllers.defaultPage)
 
 sequelize
   .sync() //this function writes all of the sequelize models by default into the database
-  .then((result) => {
-    console.log(result)
+  .then(() => {
     app.listen(3000)
   })
-  .catch((err) => console.log(err))
+  .catch((err) => console.log("Error:", err))
