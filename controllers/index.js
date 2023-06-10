@@ -5,8 +5,7 @@ const Product = require("../models/product")
 /*_______________________________________________________________________________________*/
 
 function adminGet(req, res) {
-  /* We can make difference between app.get and app.post, app.use is for any request.
-   The more specific middleware has to be first, otherwise it will never be reached */
+  //form for sending post request
   res.send(
     `
     <p>This page offers form for sending request and also is an handler for the request itself</p>
@@ -16,32 +15,59 @@ function adminGet(req, res) {
 }
 
 function adminPost(req, res) {
-  const product = new Product(req.body.title)
-  product.save()
-  res.redirect("/product")
+  //accepting the post request and sending the data do the database
+  const title = req.body.title
+  const description = "Description"
+  const price = 9.99
+  const product = new Product(title, price, description)
+  product
+    .save()
+    .then(() => {
+      res.redirect("/product")
+    })
+    .catch((err) => console.log(err))
 }
 
 /*_______________________________________________________________________________________*/
 
 function productGet(req, res) {
-  Product.fetchAll((products) => {
-    //the page is loaded only once all the products are fetched
-    res.send(`<p>Products list
-    ${products.map(
-      (product) =>
-        `<br/>- <a href='product/${product.id}'>${product.title}</a><br/>`
-    )}
-    <br/>
-    <button onclick="window.location.href='/'">
-    Back to home page</button>
-    `)
-  })
+  //fetching all the products from the database
+  Product.fetchAll()
+    .then(([rows, fieldData]) => {
+      res.send(`
+      <div><h2>Products</h2>
+        <ul>
+          ${rows
+            .map(
+              (product) =>
+                `<li><a href="product/${product.id}">${product.title}</a></li>`
+            )
+            .join("")}
+        </ul>
+      </div>
+      `)
+    })
+    .catch((err) => console.log(err))
+}
+
+/*_______________________________________________________________________________________*/
+
+function productDetailGet(req, res) {
+  //page displaying a single product
+  const productId = req.params.productId
+  Product.findById(productId)
+    .then(([product]) => {
+      res.send(
+        `<p>This is the single product with a title: ${product[0].title}`
+      )
+    })
+    .catch((err) => console.log(err))
 }
 
 /*_______________________________________________________________________________________*/
 
 function defaultPage(req, res) {
-  //catching all the uncatched
+  //default page
   res.send(`
   <div>
     <h2>Node js project for learning purposes</h2>
@@ -53,20 +79,10 @@ function defaultPage(req, res) {
 
 /*_______________________________________________________________________________________*/
 
-function productDetailGet(req, res) {
-  const productId = req.params.productId
-  Product.fetchOne(productId, (product) => {
-    res.send(`<div>Page for a simple product by their ID from the URL: ${productId}<br/><br/>
-    Title: ${product.title}</div>`)
-  })
-}
-
-/*_______________________________________________________________________________________*/
-
 module.exports = {
   adminGet,
   adminPost,
   productGet,
-  defaultPage,
   productDetailGet,
+  defaultPage,
 }
