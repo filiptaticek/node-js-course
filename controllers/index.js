@@ -2,21 +2,10 @@
 
 const Product = require("../models/product")
 const Nav = `
-<button onclick="window.location.href='/admin'">Create a new product</button>
-<button onclick="window.location.href='/product'">List of products</button>
+<button onclick="window.location.href='/product'">Products page</button>
 `
 
 /*_______________________________________________________________________________________*/
-
-function adminGet(req, res) {
-  //form for sending post request
-  res.send(
-    `
-    <p>This page offers form for sending request and also is an handler for the request itself</p>
-    <form method="POST" action="/admin"><input type="text" name="title"></input><button type="submit">submit</button></form>
-    `
-  )
-}
 
 function adminPost(req, res) {
   //accepting the post request and sending the data do the database
@@ -28,9 +17,8 @@ function adminPost(req, res) {
     description,
     price,
   })
-    .then((result) => {
-      console.log("Added a new book succesfuly.")
-      res.redirect("/")
+    .then(() => {
+      res.redirect("/product")
     })
     .catch((err) => console.log(err))
 }
@@ -41,13 +29,22 @@ function productAll(req, res) {
   //fetching all the products from the database
   Product.findAll()
     .then((products) => {
-      const productHTML = products
-        .map(
-          (product) =>
-            `<a href="/product/${product.id}">Title: ${product.title}</p>`
-        )
-        .join("")
-      res.send(productHTML)
+      const productHTML = `
+        ${products
+          .map(
+            (product) =>
+              `<a href="/product/${product.id}">- ${product.title}</p>`
+          )
+          .join("")}
+      `
+      res.send(`<div>        
+      <h3>Add new product</h3>
+      <form method="POST" action="/admin"><input autofocus type="text" name="title"></input><button type="submit">submit</button></form>
+      <h3>Back home</h3>
+      <button onclick="window.location.href='/'">Home page</button>
+      <h3>All products:</h3>
+      ${productHTML}
+      `)
     })
     .catch((err) => console.log("Some err", err))
 }
@@ -62,15 +59,18 @@ function productDetail(req, res) {
     .then((result) =>
       res.send(
         `<div>
-        <p>Book title: ${result.title}!</p>
-        <p>Edit book title: </p>
-        <form method="POST" action="/product/${productId}"><input type="text" name="title"></input><button type="submit">submit</button></form>
+        <h3>Title</h3>
+        <p>${result.title}</p>
+        <h3>Edit book title: </h3>
+        <form method="POST" action="/product/${productId}"><input autofocus type="text" name="title"></input><button type="submit">submit</button></form>
+        <h3>Delete the book: </h3>
         <form method="POST" action="/product/delete">
           <input type="hidden" name="id" value=${productId}></input>
           <button type="submit">
           Delete post
           </button>
         </form>
+        <h3>Back to products page: </h3>
         ${Nav}
       </div>
       `
@@ -97,7 +97,6 @@ function productEdit(req, res) {
 
 function productDelete(req, res) {
   const productId = req.body.id
-  console.log("Došlo to sem aspoň", productId)
   Product.destroy({ where: { id: productId } })
     .then(() => {
       res.redirect(`/product`)
@@ -111,7 +110,7 @@ function defaultPage(req, res) {
   //default page
   res.send(`
   <div>
-    <h2>Node js project for learning purposes</h2>
+    <h2>Node.js project for learning purposes</h2>
     ${Nav}
   </div>
   `)
@@ -120,7 +119,6 @@ function defaultPage(req, res) {
 /*_______________________________________________________________________________________*/
 
 module.exports = {
-  adminGet,
   adminPost,
   productAll,
   productDetail,
