@@ -1,6 +1,10 @@
 // All the controllers in our project are defined in this file
 
 const Product = require("../models/product")
+const Nav = `
+<button onclick="window.location.href='/admin'">Create a new product</button>
+<button onclick="window.location.href='/product'">List of products</button>
+`
 
 /*_______________________________________________________________________________________*/
 
@@ -33,7 +37,7 @@ function adminPost(req, res) {
 
 /*_______________________________________________________________________________________*/
 
-function productGet(req, res) {
+function productAll(req, res) {
   //fetching all the products from the database
   Product.findAll()
     .then((products) => {
@@ -50,14 +54,55 @@ function productGet(req, res) {
 
 /*_______________________________________________________________________________________*/
 
-function productDetailGet(req, res) {
+function productDetail(req, res) {
   //page displaying a single product
-  //const prodId = req.body.productId
-  Product.findByPk(1)
+  //we could also use syntax like Product.findAll({where: {id: req.body.productId}})...
+  const productId = req.params.productId
+  Product.findByPk(productId)
     .then((result) =>
-      res.send(`<p>This is the title of your book: ${result.title}!`)
+      res.send(
+        `<div>
+        <p>Book title: ${result.title}!</p>
+        <p>Edit book title: </p>
+        <form method="POST" action="/product/${productId}"><input type="text" name="title"></input><button type="submit">submit</button></form>
+        <form method="POST" action="/product/delete">
+          <input type="hidden" name="id" value=${productId}></input>
+          <button type="submit">
+          Delete post
+          </button>
+        </form>
+        ${Nav}
+      </div>
+      `
+      )
     )
     .catch((err) => console.log(err))
+}
+
+/*_______________________________________________________________________________________*/
+
+function productEdit(req, res) {
+  const productId = req.params.productId
+  const newTitle = req.body.title
+  Product.findByPk(productId)
+    .then((product) => {
+      product.title = newTitle
+      return product.save()
+    })
+    .then(() => res.redirect(`/product/${productId}`))
+    .catch((err) => console.log("We've got an issue", err))
+}
+
+/*_______________________________________________________________________________________*/
+
+function productDelete(req, res) {
+  const productId = req.body.id
+  console.log("Došlo to sem aspoň", productId)
+  Product.destroy({ where: { id: productId } })
+    .then(() => {
+      res.redirect(`/product`)
+    })
+    .catch((err) => console.log("Chyba", err))
 }
 
 /*_______________________________________________________________________________________*/
@@ -67,8 +112,7 @@ function defaultPage(req, res) {
   res.send(`
   <div>
     <h2>Node js project for learning purposes</h2>
-    <button onclick="window.location.href='/admin'">Create a new product</button>
-    <button onclick="window.location.href='/product'">List of products</button>
+    ${Nav}
   </div>
   `)
 }
@@ -78,7 +122,9 @@ function defaultPage(req, res) {
 module.exports = {
   adminGet,
   adminPost,
-  productGet,
-  productDetailGet,
+  productAll,
+  productDetail,
+  productEdit,
+  productDelete,
   defaultPage,
 }
