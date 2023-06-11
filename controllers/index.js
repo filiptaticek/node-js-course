@@ -9,14 +9,17 @@ const Nav = `
 
 function adminPost(req, res) {
   //accepting the post request and sending the data do the database
+  console.log("Sem jsem došel", req.user)
   const title = req.body.title
   const description = "Description"
   const price = 9.99
-  Product.create({
-    title,
-    description,
-    price,
-  })
+  req.user
+    .createProduct({
+      //we can create a product already on our associated user
+      title,
+      description,
+      price,
+    })
     .then(() => {
       res.redirect("/product")
     })
@@ -27,7 +30,8 @@ function adminPost(req, res) {
 
 function productAll(req, res) {
   //fetching all the products from the database
-  Product.findAll()
+  req.user
+    .getProducts()
     .then((products) => {
       const productHTML = `
         ${products
