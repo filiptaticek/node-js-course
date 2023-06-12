@@ -12,6 +12,7 @@ const Cart = require("./models/cart")
 const app = express()
 app.use(bodyParser.urlencoded()) //parser used for parsing the body of the req.body.
 app.use((req, res, next) => {
+  //seting the user
   User.findByPk(1)
     .then((user) => {
       req.user = user
@@ -22,7 +23,7 @@ app.use((req, res, next) => {
 
 app.use("/product", productRouter)
 app.use("/cart", cartRouter)
-app.use(controllers.defaultPage) //default page
+app.use("/", controllers.defaultPage) //default page
 
 Product.belongsTo(User, { constrains: true, onDelete: "CASCADE" }) //once  the user is deleted, so is the product
 User.hasMany(Product)
