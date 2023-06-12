@@ -1,15 +1,17 @@
 // All the controllers in our project are defined in this file
 
 const Product = require("../models/product")
+const CartItem = require("../models/cartItem")
 const Nav = `
+<button onclick="window.location.href='/'">Home page</button>
 <button onclick="window.location.href='/product'">Products page</button>
+<button onclick="window.location.href='/cart'">Carts page</button>
 `
 
 /*_______________________________________________________________________________________*/
 
-function adminPost(req, res) {
+function productPost(req, res) {
   //accepting the post request and sending the data do the database
-  console.log("Sem jsem došel", req.user)
   const title = req.body.title
   const description = "Description"
   const price = 9.99
@@ -43,9 +45,9 @@ function productAll(req, res) {
       `
       res.send(`<div>        
       <h3>Add new product</h3>
-      <form method="POST" action="/admin"><input autofocus type="text" name="title"></input><button type="submit">submit</button></form>
-      <h3>Back home</h3>
-      <button onclick="window.location.href='/'">Home page</button>
+      <form method="POST" action="/product"><input autofocus type="text" name="title"></input><button type="submit">submit</button></form>
+      <h3>Navigation</h3>
+      ${Nav}
       <h3>All products:</h3>
       ${productHTML}
       `)
@@ -67,14 +69,19 @@ function productDetail(req, res) {
         <p>${result.title}</p>
         <h3>Edit book title: </h3>
         <form method="POST" action="/product/${productId}"><input autofocus type="text" name="title"></input><button type="submit">submit</button></form>
-        <h3>Delete the book: </h3>
+
+        <h3>Actions: </h3>
         <form method="POST" action="/product/delete">
           <input type="hidden" name="id" value=${productId}></input>
-          <button type="submit">
-          Delete post
-          </button>
+          <button type="submit">Delete post</button>
         </form>
-        <h3>Back to products page: </h3>
+
+        <form method="POST" action="/cart">
+          <input type="hidden" name="id" value=${productId}></input>
+          <button type="submit">Add to cart</button>
+        </form>
+
+        <h3>Navigation: </h3>
         ${Nav}
       </div>
       `
@@ -110,6 +117,65 @@ function productDelete(req, res) {
 
 /*_______________________________________________________________________________________*/
 
+function cartGet(req, res) {
+  //cart page
+  CartItem.findAll()
+    .then((results) => {
+      const productHTML = `
+      ${results
+        .map(
+          (result) =>
+            `<a href="/product/${result.productId}">Product with ID ${result.productId} is in the cart ${result.quantity} times</p>`
+        )
+        .join("")}
+          `
+      res.send(`
+      <h3>This is you cart: </h3>
+          ${productHTML}
+      `)
+    })
+    .catch((err) => console.log(err))
+}
+
+/*_______________________________________________________________________________________*/
+
+function CartPost(req, res, next) {
+  //adding things to database with this request
+  const prodId = req.body.id
+  let fetchedCart
+  let newQuantity = 1
+  req.user
+    .getCart()
+    .then((cart) => {
+      fetchedCart = cart
+      return cart.getProducts({ where: { id: prodId } })
+    })
+    .then((products) => {
+      let product
+      if (products.length > 0) {
+        product = products[0]
+      }
+
+      if (product) {
+        const oldQuantity = product.cartItem.quantity
+        newQuantity = oldQuantity + 1
+        return product
+      }
+      return Product.findByPk(prodId)
+    })
+    .then((product) => {
+      return fetchedCart.addProduct(product, {
+        through: { quantity: newQuantity },
+      })
+    })
+    .then(() => {
+      res.redirect("/cart")
+    })
+    .catch((err) => console.log(err))
+}
+
+/*_______________________________________________________________________________________*/
+
 function defaultPage(req, res) {
   //default page
   res.send(`
@@ -123,10 +189,12 @@ function defaultPage(req, res) {
 /*_______________________________________________________________________________________*/
 
 module.exports = {
-  adminPost,
+  productPost,
   productAll,
   productDetail,
   productEdit,
   productDelete,
   defaultPage,
+  CartPost,
+  cartGet,
 }

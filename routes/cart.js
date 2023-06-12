@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const controllers = require("../controllers/index")
 
-router.post("/", controllers.adminPost)
+router.get("/", controllers.cartGet)
+router.post("/", controllers.CartPost)
 
 module.exports = router
